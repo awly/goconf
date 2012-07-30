@@ -47,7 +47,7 @@ func Put(key string, val interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(cPath, data, 0)
+	err = ioutil.WriteFile(cPath, data, 0666)
 	return err
 }
 

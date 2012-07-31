@@ -25,11 +25,11 @@ func init() {
 			if err != nil {
 				ri = default_refresh_interval
 			}
-            ref_interval, err := ri.(float64)
-            if err != nil {
+            ref_interval, ok := ri.(float64)
+            if !ok {
                 ref_interval = default_refresh_interval
             }
-			time.Sleep(ref_interval * time.Second)
+			time.Sleep(time.Duration(ref_interval) * time.Second)
 		}
 	}()
 }

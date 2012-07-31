@@ -8,7 +8,9 @@ import (
 	"time"
 )
 
-const refresh_interval = 3
+// Value used as config refresh interval (reading from file) if it was
+// not specified in config.
+const default_refresh_interval = 3
 
 var (
 	c     = &config{data: make(map[string]interface{})}
@@ -16,11 +18,14 @@ var (
 )
 
 func init() {
-	// Refresh routine, reacts to changes in config
 	go func() {
-		t := time.Tick(refresh_interval * time.Second)
-		for _ = range t {
+		for {
 			LoadConfig(cPath)
+			ri, err := Get("refresh_interval")
+			if err != nil {
+				ri = default_refresh_interval
+			}
+			time.Sleep(ri * time.Second)
 		}
 	}()
 }

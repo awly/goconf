@@ -47,7 +47,7 @@ func init() {
 				log.Println("'refresh' not set, unsing default :", default_refresh_interval)
 				ri = default_refresh_interval
 			}
-			ref_interval, ok := ri.(int)
+			ref_interval, ok := ri.(float64)
 			if !ok {
 				log.Println("invalid 'refresh', unsing default :", default_refresh_interval)
 				ref_interval = default_refresh_interval
@@ -65,7 +65,7 @@ func Get(keys ...string) (res interface{}, err error) {
 	defer c.Unlock()
 	res = c.data
 	for i := 0; i < len(keys); i++ {
-        t, ok := map[string]interface{}{}, false
+		t, ok := map[string]interface{}{}, false
 		if t, ok = res.(map[string]interface{}); !ok {
 			return nil, errors.New(fmt.Sprint("can't get vale for", keys))
 		}
@@ -85,14 +85,14 @@ func LoadConfig(path string) error {
 	}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-        log.Println("failed to read config file :", err)
+		log.Println("failed to read config file :", err)
 		return err
 	}
 	c.Lock()
 	defer c.Unlock()
-    if err := json.Unmarshal(data, &c.data); err != nil {
-        return err
-    }
+	if err := json.Unmarshal(data, &c.data); err != nil {
+		return err
+	}
 	c.path = path
-    return nil
+	return nil
 }

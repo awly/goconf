@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const default_refresh_interval = 5
+const default_refresh_interval float64 = 5
 
 var (
 	c = &config{

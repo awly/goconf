@@ -67,10 +67,10 @@ func Get(keys ...string) (res interface{}, err error) {
 	for i := 0; i < len(keys); i++ {
 		t, ok := map[string]interface{}{}, false
 		if t, ok = res.(map[string]interface{}); !ok {
-			return nil, errors.New(fmt.Sprint("can't get vale for", keys))
+			return nil, errors.New(fmt.Sprint("can't get value for ", keys))
 		}
 		if res, ok = t[keys[i]]; !ok {
-			return nil, errors.New(fmt.Sprint("can't get vale for", keys))
+			return nil, errors.New(fmt.Sprint("can't get value for ", keys))
 		}
 	}
 	return

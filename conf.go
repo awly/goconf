@@ -86,11 +86,11 @@ func LoadConfig(path string) error {
 		path = c.path
 	}
 	file, err := os.Open(path)
-	defer file.Close()
 	if err != nil {
 		log.Println("failed to read config file :", err)
 		return err
 	}
+	defer file.Close()
 	c.Lock()
 	defer c.Unlock()
 	// Check if file changed since last read
@@ -112,6 +112,7 @@ func LoadConfig(path string) error {
 	if err := json.Unmarshal(data, &c.data); err != nil {
 		return err
 	}
-	c.path = path
+	&c.path = path
+    log.Println(c.path, c.modTime)
 	return nil
 }

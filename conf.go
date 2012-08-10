@@ -26,12 +26,10 @@ import (
 
 const default_refresh_interval float64 = 5
 
-var (
-	c = &config{
-		data: make(map[string]interface{}),
-		path: "config.json",
-	}
-)
+var c = &config{
+	data: make(map[string]interface{}),
+	path: "config.json",
+}
 
 type config struct {
 	sync.Mutex
@@ -44,16 +42,19 @@ func init() {
 	go func() {
 		for {
 			LoadConfig(c.path)
+
 			ri, err := Get("refresh")
 			if err != nil {
 				log.Println("'refresh' not set, unsing default :", default_refresh_interval)
 				ri = default_refresh_interval
 			}
+
 			ref_interval, ok := ri.(float64)
 			if !ok {
 				log.Println("invalid 'refresh', unsing default :", default_refresh_interval)
 				ref_interval = default_refresh_interval
 			}
+
 			time.Sleep(time.Duration(ref_interval) * time.Second)
 		}
 	}()
@@ -65,6 +66,7 @@ func init() {
 func Get(keys ...string) (res interface{}, err error) {
 	c.Lock()
 	defer c.Unlock()
+
 	res = c.data
 	for i := 0; i < len(keys); i++ {
 		t, ok := map[string]interface{}{}, false
@@ -85,34 +87,41 @@ func LoadConfig(path string) error {
 	if path == "" {
 		path = c.path
 	}
+
 	file, err := os.Open(path)
 	if err != nil {
 		log.Println("failed to read config file :", err)
 		return err
 	}
 	defer file.Close()
+
 	c.Lock()
 	defer c.Unlock()
+
 	// Check if file changed since last read
-	if stat, err := file.Stat(); err != nil {
-		log.Println("failed to read config file :", err)
-		return err
-	} else {
-		if stat.ModTime().After(c.modTime) {
-			c.modTime = stat.ModTime()
+	if path == c.path {
+		if stat, err := file.Stat(); err != nil {
+			log.Println("failed to read config file :", err)
+			return err
 		} else {
-			return nil
+			if stat.ModTime().After(c.modTime) {
+				c.modTime = stat.ModTime()
+			} else {
+				return nil
+			}
 		}
 	}
+
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Println("failed to read config file :", err)
 		return err
 	}
+
 	if err := json.Unmarshal(data, &c.data); err != nil {
 		return err
 	}
 	c.path = path
-    log.Println(c.path, c.modTime)
+
 	return nil
 }

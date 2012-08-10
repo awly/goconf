@@ -112,7 +112,7 @@ func LoadConfig(path string) error {
 	if err := json.Unmarshal(data, &c.data); err != nil {
 		return err
 	}
-	&c.path = &path
+	c.path = path
     log.Println(c.path, c.modTime)
 	return nil
 }

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -34,8 +35,9 @@ var (
 
 type config struct {
 	sync.Mutex
-	data map[string]interface{}
-	path string
+	data    map[string]interface{}
+	path    string
+	modTime time.Time
 }
 
 func init() {
@@ -83,13 +85,30 @@ func LoadConfig(path string) error {
 	if path == "" {
 		path = c.path
 	}
-	data, err := ioutil.ReadFile(path)
+	file, err := os.Open(path)
+	defer file.Close()
 	if err != nil {
 		log.Println("failed to read config file :", err)
 		return err
 	}
 	c.Lock()
 	defer c.Unlock()
+	// Check if file changed since last read
+	if stat, err := file.Stat(); err != nil {
+		log.Println("failed to read config file :", err)
+		return err
+	} else {
+		if stat.ModTime().After(c.modTime) {
+			c.modTime = stat.ModTime()
+		} else {
+			return nil
+		}
+	}
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Println("failed to read config file :", err)
+		return err
+	}
 	if err := json.Unmarshal(data, &c.data); err != nil {
 		return err
 	}
